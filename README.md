@@ -1,162 +1,124 @@
-# NachOS Docker Environment for ARM Architecture
+# NachOS Docker Environment | NachOS Docker 開發環境
 
-This project provides a Docker-based solution to run NachOS (Not Another Completely Heuristic Operating System) on ARM architecture, specifically designed for Apple Silicon M2 chips.
+Complete NachOS development environment with Docker for all platforms.  
+跨平台的完整 NachOS Docker 開發環境。
 
-## 🎯 Problem Solved
+## 🚀 Quick Installation | 快速安裝
 
-- **Architecture Compatibility**: Runs x86_64 NachOS on ARM architecture through Docker emulation
-- **Environment Consistency**: Provides the exact Ubuntu 22.04 LTS environment as specified in the course
-- **Easy Setup**: One-command installation and execution
-- **Course Compliance**: Includes all dependencies and MIPS cross-compiler from the course materials
-
-## 📋 Prerequisites
-
-- Docker Desktop for Mac (with Apple Silicon support)
-- Git
-- At least 4GB of available disk space
-
-## 🚀 Quick Start
-
-1. **Clone and Install**:
-   ```bash
-   git clone git@github.com:WuSandWitch/nachos-docker.git
-   cd nachos-docker
-   ./install.sh
-   ```
-
-2. **Start Interactive Development**:
-   ```bash
-   ./run.sh
-   ```
-
-3. **Test the Environment**:
-   ```bash
-   ./test.sh
-   ```
-
-## 📁 Project Structure
-
-```
-nachos-docker/
-├── Dockerfile          # Docker container definition
-├── build.sh            # Build script for the environment
-├── run.sh              # Launch interactive environment
-├── test.sh             # Run basic functionality tests
-├── README.md           # This file
-└── NachOS/             # Course-provided NachOS source code
-    ├── code/           # Main NachOS source
-    ├── usr/            # MIPS cross-compiler tools
-    └── ...
-```
-
-## 💻 Usage Examples
-
-### In the Docker Environment
-
-Once you run `./run.sh`, you'll be in the NachOS development environment:
-
+**English:**
 ```bash
-# Build NachOS (if needed)
-make
+git clone git@github.com:WuSandWitch/nachos-docker.git
+cd nachos-docker
+./install.sh
+```
 
-# Run test programs
+**中文：**
+```bash
+git clone git@github.com:WuSandWitch/nachos-docker.git
+cd nachos-docker
+./install.sh
+```
+
+That's it! The script will automatically set up everything you need.  
+就這樣！安裝腳本會自動設置你需要的一切。
+
+## 🎯 Quick Start | 快速開始
+
+**Start development environment | 啟動開發環境:**
+```bash
+./run.sh
+```
+
+**Inside the container | 在容器內:**
+```bash
+# Run test program | 執行測試程式
 ./userprog/nachos -e ./test/test1
 
-# Run with debug output
+# Debug mode | 除錯模式
 ./userprog/nachos -d + -e ./test/test1
 
-# Run specific debug flags (threads)
-./userprog/nachos -d t -e ./test/test1
+# Rebuild NachOS | 重新建置 NachOS
+make clean && make
 
-# Create and test your own programs
-cd test/
-nano myprogram.c
-# Add your program to Makefile
-make
-cd ..
-./userprog/nachos -e ./test/myprogram
+# Exit container | 離開容器
+exit
 ```
 
-## 🛠 Development Workflow
+## 📋 Prerequisites | 系統需求
 
-1. **Edit Code**: Use your favorite editor on the host machine
-2. **Build & Test**: Use the Docker environment for compilation and testing
-3. **Version Control**: Git operations work normally on the host
+- **Docker** (Docker Desktop or Docker Engine)
+- **Git**
+- **At least 2GB free space | 至少 2GB 可用空間**
 
-### File Sharing
+**Supported platforms | 支援平台:**
+- macOS (Intel & Apple Silicon)
+- Linux (x86_64 & ARM64)
+- Windows (with WSL2)
 
-The `run.sh` script mounts the current directory into the container at `/work`, allowing you to:
-- Edit files on your host machine with your preferred tools
-- Build and run inside the container
-- Maintain persistent changes
+## ✨ Features | 特色
 
-## 🔧 Technical Details
+- ✅ **Complete NachOS 4.0 | 完整 NachOS 4.0 環境**
+- ✅ **Cross-platform compatibility | 跨平台相容性**
+- ✅ **MIPS cross-compiler | MIPS 交叉編譯器**
+- ✅ **All test programs included | 包含所有測試程式**
+- ✅ **Debug support | 完整除錯支援**
+- ✅ **Development tools (nano, vim, gdb) | 開發工具**
 
-### Architecture Emulation
+## 🔧 Development Workflow | 開發流程
 
-- **Host**: ARM64 (Apple Silicon M2)
-- **Container**: linux/amd64 (emulated via Rosetta 2)
-- **Performance**: Excellent for development and coursework
+**English:**
+1. **Edit code** - Modify files in `/code` directory
+2. **Rebuild** - Run `make` to compile changes  
+3. **Test** - Run your programs with `./userprog/nachos`
 
-### Course Compliance
+**中文：**
+1. **編輯程式碼** - 修改 `/code` 目錄中的檔案
+2. **重新建置** - 執行 `make` 編譯修改
+3. **測試** - 用 `./userprog/nachos` 執行程式
 
-This environment replicates the exact setup described in the course tutorial:
-- Ubuntu 22.04 LTS x86_64
-- All required dependencies (`csh`, `ed`, `git`, `build-essential`, etc.)
-- MIPS cross-compiler from the course-provided `usr/` directory
-- 32-bit support via `i386` architecture enablement
+## 🐛 Troubleshooting | 故障排除
 
-### Container Features
-
-- **Optimized Build**: Multi-stage build process for smaller image size
-- **Development Tools**: Includes `nano`, `vim`, `gdb` for debugging
-- **Convenient Aliases**: Pre-configured shortcuts for common commands
-- **Auto-setup**: Automatically navigates to the correct directory
-
-## 🐛 Troubleshooting
-
-### Docker Issues
-
+**Docker not running | Docker 未啟動:**
 ```bash
-# If Docker daemon is not running
+# macOS
 open -a Docker
 
-# If platform issues occur
-docker system prune
-./build.sh
+# Linux
+sudo systemctl start docker
+
+# Windows
+# Start Docker Desktop from Start Menu
 ```
 
-### Build Issues
+**Test functionality | 測試功能:**
+```bash
+./test.sh
+```
+
+**Clean rebuild | 清潔重建:**
+```bash
+# Inside container | 在容器內
+make clean && make
+```
+
+## 📚 Common Commands | 常用指令
 
 ```bash
-# Clean rebuild
-docker image rm nachos:arm-to-x86
-./build.sh
+# Development | 開發
+./run.sh                    # Start environment | 啟動環境
+./test.sh                   # Run tests | 執行測試
+
+# Inside container | 容器內指令
+make                        # Build NachOS | 建置 NachOS
+./userprog/nachos -e ./test/test1    # Run program | 執行程式
+./userprog/nachos -d + -e ./test/test1    # Debug mode | 除錯模式
 ```
 
-### Performance Issues
+## 🎓 Perfect for Coursework | 完美適用於課程作業
 
-The emulation performance is generally excellent, but for intensive development:
-- Close unnecessary applications
-- Ensure Docker Desktop has adequate resources allocated
+This environment provides everything needed for NachOS assignments and projects.  
+此環境提供 NachOS 作業和專案所需的一切工具。
 
-## 📚 Course Integration
+---
 
-This setup is designed to work seamlessly with the NachOS course materials:
-
-- **Homework Assignments**: All functionality preserved
-- **System Calls**: Full implementation support
-- **Debugging**: Complete debug flag support
-- **Testing**: All test programs included and working
-
-## 🤝 Contributing
-
-Feel free to improve this setup! Common areas for enhancement:
-- Additional development tools
-- IDE integration
-- Performance optimizations
-- Additional test scripts
-
-## 📄 License
-
-This Docker environment setup is provided as-is for educational purposes. NachOS itself retains its original licensing.
+**Ready for NachOS development on any platform! | 準備在任何平台上開發 NachOS！** ✨

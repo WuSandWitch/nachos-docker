@@ -1,64 +1,150 @@
-# NachOS Docker Environment for ARM Architecture (Apple Silicon M2)
-# This Dockerfile creates a Ubuntu x86_64 environment that runs on ARM via emulation
+# NachOS Docker Environment - Optimized Multi-Stage Build
+# Reduced image size for distribution
+# Optimized for ARM Architecture (Apple Silicon) -> x86_64 emulation
 
-FROM --platform=linux/amd64 ubuntu:22.04
+# Build stage
+FROM --platform=linux/amd64 ubuntu:22.04 AS builder
 
-# Set environment variables
+# Set environment variables for build
 ENV DEBIAN_FRONTEND=noninteractive
-ENV PATH="/usr/local/nachos/bin:${PATH}"
 
-# Set working directory
-WORKDIR /root
-
-# Update system and install dependencies
+# Install build dependencies
 RUN apt-get update && \
     apt-get dist-upgrade -y && \
     # Enable i386 architecture (required for 32-bit support)
     dpkg --add-architecture i386 && \
     apt-get update && \
-    # Install NachOS dependencies as specified in the tutorial
-    apt-get install -y \
+    # Install build dependencies
+    apt-get install -y --no-install-recommends \
         csh \
         ed \
         git \
         build-essential \
         gcc-multilib \
         g++-multilib \
-        gdb \
-        gdb-multiarch \
-        nano \
-        vim \
-        wget \
-        curl && \
-    # Clean up to reduce image size
+        ca-certificates && \
+    # Clean up cache
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /root
 
 # Copy NachOS source code
 COPY NachOS /root/NachOS
 
-# Install MIPS cross-compiler from the provided usr directory
+# Install MIPS cross-compiler and build NachOS
 RUN cd /root/NachOS && \
+    # Install cross-compiler
     cp -r usr/* /usr/ && \
-    # Verify cross-compiler installation
-    ls -la /usr/local/nachos/bin/ || echo "Cross-compiler path may be different"
+    # Build NachOS
+    cd code && \
+    make && \
+    # Verify build
+    ls -la userprog/nachos && \
+    ls -la test/*.coff
 
-# Build NachOS
-WORKDIR /root/NachOS/code
-RUN make clean || true && \
-    make
+# Runtime stage
+FROM --platform=linux/amd64 ubuntu:22.04
 
-# Create convenient aliases and setup
+# Metadata
+LABEL maintainer="NachOS Docker Environment" \
+      description="Complete NachOS development environment for ARM/Apple Silicon (Optimized)" \
+      version="1.0.0-optimized" \
+      platform="linux/amd64"
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive \
+    PATH="/usr/local/nachos/bin:${PATH}" \
+    NACHOS_HOME="/root/NachOS"
+
+# Install only runtime dependencies
+RUN apt-get update && \
+    apt-get dist-upgrade -y && \
+    # Enable i386 architecture (required for 32-bit support)
+    dpkg --add-architecture i386 && \
+    apt-get update && \
+    # Install runtime and development dependencies
+    apt-get install -y --no-install-recommends \
+        csh \
+        ed \
+        make \
+        gcc \
+        g++ \
+        gcc-multilib \
+        g++-multilib \
+        gdb \
+        gdb-multiarch \
+        nano \
+        vim \
+        libc6:i386 \
+        libgcc-s1:i386 \
+        libstdc++6 \
+        libstdc++6:i386 \
+        ca-certificates && \
+    # Clean up to minimize image size
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+           /usr/share/doc/* \
+           /usr/share/man/* \
+           /usr/share/locale/* \
+           /var/cache/debconf/* \
+           /usr/share/common-licenses
+
+# Set working directory
+WORKDIR /root
+
+# Copy built NachOS and cross-compiler from builder stage
+COPY --from=builder /root/NachOS /root/NachOS
+COPY --from=builder /usr/local/nachos /usr/local/nachos
+
+# Remove unnecessary build artifacts from copied files
+RUN cd /root/NachOS/code && \
+    # Keep only essential files, remove build intermediates
+    find . -name "*.o" -delete && \
+    find . -name "*.d" -delete && \
+    find . -name "*.tmp" -delete && \
+    find . -name "*.bak" -delete && \
+    find . -name "*~" -delete
+
+# Create optimized startup script
+RUN printf '#!/bin/bash\n\
+clear\n\
+echo "🚀 Welcome to NachOS Docker Environment (Optimized)!"\n\
+echo "📍 Platform: x86_64 emulated on ARM"\n\
+echo "📂 Location: $(pwd)"\n\
+echo ""\n\
+echo "🎯 Quick Start Commands:"\n\
+echo "  ./userprog/nachos -e ./test/test1    # Run test1"\n\
+echo "  ./userprog/nachos -d + -e ./test/test1    # Debug mode"\n\
+echo ""\n\
+echo "📝 Available test programs:"\n\
+ls -1 test/*.coff | sed "s|test/||" | sed "s|\\.coff||" | sed "s/^/    /"\n\
+echo ""\n\
+echo "📚 Debug flags:"\n\
+echo "  -d +        # All debug info"\n\
+echo "  -d t        # Thread debug"\n\
+echo "  -d s        # Semaphore debug"\n\
+echo "  -d m        # Machine debug"\n\
+echo ""\n\
+cd $NACHOS_HOME/code\n\
+exec /bin/bash "$@"\n' > /root/start-nachos.sh && \
+    chmod +x /root/start-nachos.sh
+
+# Create minimal aliases for efficiency
 RUN echo 'alias ll="ls -la"' >> /root/.bashrc && \
-    echo 'alias nachos="./userprog/nachos"' >> /root/.bashrc && \
-    echo 'cd /root/NachOS/code' >> /root/.bashrc && \
-    echo 'echo "=== NachOS Docker Environment Ready ==="' >> /root/.bashrc && \
-    echo 'echo "Current directory: $(pwd)"' >> /root/.bashrc && \
-    echo 'echo "Available test programs in ./test/"' >> /root/.bashrc && \
-    echo 'echo "Example: ./userprog/nachos -e ./test/test1"' >> /root/.bashrc
+    echo 'alias n="./userprog/nachos"' >> /root/.bashrc && \
+    echo 'alias nd="./userprog/nachos -d +"' >> /root/.bashrc && \
+    echo 'cd $NACHOS_HOME/code 2>/dev/null || true' >> /root/.bashrc
 
-# Set the default working directory to NachOS code
+# Set the default working directory
 WORKDIR /root/NachOS/code
+
+# Health check
+HEALTHCHECK --interval=60s --timeout=3s --start-period=10s --retries=2 \
+    CMD test -f /root/NachOS/code/userprog/nachos && \
+        /root/NachOS/code/userprog/nachos --help >/dev/null 2>&1 || exit 1
 
 # Default command
-CMD ["/bin/bash"]
+CMD ["/root/start-nachos.sh"]
