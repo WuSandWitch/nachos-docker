@@ -12,13 +12,6 @@ cd nachos-docker
 ./install.sh
 ```
 
-**中文：**
-```bash
-git clone git@github.com:WuSandWitch/nachos-docker.git
-cd nachos-docker
-./install.sh
-```
-
 That's it! The script will automatically set up everything you need.  
 就這樣！安裝腳本會自動設置你需要的一切。
 
