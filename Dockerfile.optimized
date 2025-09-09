@@ -64,10 +64,15 @@ RUN apt-get update && \
     # Enable i386 architecture (required for 32-bit support)
     dpkg --add-architecture i386 && \
     apt-get update && \
-    # Install runtime dependencies only
+    # Install runtime and development dependencies
     apt-get install -y --no-install-recommends \
         csh \
         ed \
+        make \
+        gcc \
+        g++ \
+        gcc-multilib \
+        g++-multilib \
         gdb \
         gdb-multiarch \
         nano \
