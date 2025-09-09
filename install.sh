@@ -74,6 +74,21 @@ else
 fi
 echo ""
 
+# Download NachOS source code if not present
+if [ ! -d "NachOS" ]; then
+    echo -e "${YELLOW}⬇️ Downloading NachOS source code...${NC}"
+    git clone https://github.com/wynn1212/NachOS.git NachOS
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}✅ NachOS source downloaded${NC}"
+    else
+        echo -e "${RED}❌ Failed to download NachOS source${NC}"
+        exit 1
+    fi
+else
+    echo -e "${GREEN}✅ NachOS source already available${NC}"
+fi
+echo ""
+
 # Build Docker image
 echo -e "${YELLOW}🔨 Building NachOS Docker image (this may take 5-10 minutes)...${NC}"
 docker build --platform linux/amd64 -t "$DOCKER_IMAGE" .
