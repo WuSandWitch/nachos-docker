@@ -28,5 +28,5 @@ docker run \
     --platform linux/amd64 \
     -it \
     --rm \
-    -v "$(pwd)":/work \
+    -v "$(pwd)/NachOS":/root/NachOS \
     nachos:arm-to-x86
