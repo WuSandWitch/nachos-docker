@@ -29,4 +29,4 @@ docker run \
     -it \
     --rm \
     -v "$(pwd)/NachOS":/root/NachOS \
-    nachos:arm-to-x86
+    nachos:optimized

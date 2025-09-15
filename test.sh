@@ -18,7 +18,7 @@ echo ""
 
 # Test 1: Build verification
 echo -e "${YELLOW}Test 1: Verifying NachOS build...${NC}"
-docker run --platform linux/amd64 --rm nachos:arm-to-x86 /bin/bash -c "
+docker run --platform linux/amd64 --rm nachos:optimized /bin/bash -c "
     cd /root/NachOS/code &&
     ls -la userprog/nachos &&
     echo 'Build verification: PASSED'
@@ -35,7 +35,7 @@ echo ""
 
 # Test 2: Run test1
 echo -e "${YELLOW}Test 2: Running test1 program...${NC}"
-docker run --platform linux/amd64 --rm nachos:arm-to-x86 /bin/bash -c "
+docker run --platform linux/amd64 --rm nachos:optimized /bin/bash -c "
     cd /root/NachOS/code &&
     ./userprog/nachos -e ./test/test1
 "
@@ -51,7 +51,7 @@ echo ""
 
 # Test 3: Debug mode test
 echo -e "${YELLOW}Test 3: Testing debug mode...${NC}"
-docker run --platform linux/amd64 --rm nachos:arm-to-x86 /bin/bash -c "
+docker run --platform linux/amd64 --rm nachos:optimized /bin/bash -c "
     cd /root/NachOS/code &&
     timeout 10 ./userprog/nachos -d t || true
 "
