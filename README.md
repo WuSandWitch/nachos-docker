@@ -15,6 +15,26 @@ cd nachos-docker
 That's it! The script will automatically set up everything you need.  
 就這樣！安裝腳本會自動設置你需要的一切。
 
+### Use a specific NachOS branch | 指定 NachOS 分支
+
+```bash
+./install.sh --branch hw2
+# or
+./install.sh -b hw2
+```
+
+**Notes | 注意：**
+
+English:
+- If `NachOS/` does not exist, the script will clone and checkout the branch.
+- If `NachOS/` already exists, the script will try to `git fetch` + `git checkout <branch>`.
+- If you have local changes, Git may block checkout. Please commit/stash or use a clean copy.
+
+中文：
+- 若專案中沒有 `NachOS/` 資料夾，安裝腳本會自動 clone 並切換到指定分支。
+- 若 `NachOS/` 已存在，安裝腳本會執行 `git fetch` 並嘗試 `git checkout <branch>`。
+- 若有本機修改，Git 可能會阻擋切換分支；請先 commit/stash，或使用乾淨副本再重試。
+
 ## 🎯 Quick Start | 快速開始
 
 **Start development environment | 啟動開發環境:**

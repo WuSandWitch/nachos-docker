@@ -15,10 +15,29 @@ NC='\033[0m' # No Color
 
 # Configuration
 DOCKER_IMAGE="nachos:optimized"
+BRANCH="" # optional: target NachOS git branch to checkout
 
 echo -e "${BLUE}🚀 NachOS Docker Installation${NC}"
 echo -e "${CYAN}Cross-platform NachOS development environment${NC}"
 echo ""
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --branch|-b)
+            BRANCH="$2"
+            shift 2
+            ;;
+        *)
+            # ignore unknown flags for backward compatibility
+            shift
+            ;;
+    esac
+done
+
+if [[ -n "$BRANCH" ]]; then
+    echo -e "${YELLOW}🌿 Target branch specified:${NC} ${BRANCH}"
+fi
 
 # Function to check command existence
 check_command() {
@@ -80,12 +99,34 @@ if [ ! -d "NachOS" ]; then
     git clone https://github.com/wynn1212/NachOS.git NachOS
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}✅ NachOS source downloaded${NC}"
+        if [[ -n "$BRANCH" ]]; then
+            echo -e "${YELLOW}🔁 Switching to branch:${NC} ${BRANCH}"
+            (
+                cd NachOS && \
+                git fetch --all --tags && \
+                git checkout "$BRANCH"
+            ) || {
+                echo -e "${RED}❌ Failed to checkout branch '${BRANCH}'${NC}"
+                exit 1
+            }
+        fi
     else
         echo -e "${RED}❌ Failed to download NachOS source${NC}"
         exit 1
     fi
 else
     echo -e "${GREEN}✅ NachOS source already available${NC}"
+    if [[ -n "$BRANCH" ]]; then
+        echo -e "${YELLOW}🔁 Switching to branch in existing repo:${NC} ${BRANCH}"
+        (
+            cd NachOS && \
+            git fetch --all --tags && \
+            git checkout "$BRANCH"
+        ) || {
+            echo -e "${RED}❌ Failed to checkout branch '${BRANCH}' in existing repo${NC}"
+            exit 1
+        }
+    fi
 fi
 echo ""
 
